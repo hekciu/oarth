@@ -16,7 +16,8 @@
 
                 const imports = {
                     env: {
-                        memory: memory 
+                        memory: memory,
+                        console_log: (value) => console.log(value),
                     }
                 };
 
@@ -26,6 +27,8 @@
                 const wasm = wasmInstance.exports;
 
                 console.log(wasm.add(3, 5));
+
+                wasm.run();
             })();
 
         </script>
