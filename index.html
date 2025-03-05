@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Open eaRTH</title>
+    </head>
+    <body>
+        Hello
+        <script>
+            (async () => {
+                const response = await fetch('out.wasm');
+                const bytes = await response.arrayBuffer();
+
+                const memory = new WebAssembly.Memory({ initial: 100, maximum: 1000});
+                heap = new Uint8Array(memory.buffer);
+
+                const imports = {
+                    env: {
+                        memory: memory 
+                    }
+                };
+
+                const wasmModule = new WebAssembly.Module(bytes);
+                const wasmInstance = new WebAssembly.Instance(wasmModule, imports);
+
+                const wasm = wasmInstance.exports;
+
+                console.log(wasm.add(3, 5));
+            })();
+
+        </script>
+    </body>
+</html>
