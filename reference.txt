@@ -1,1 +1,3 @@
 - https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html
+- https://dev.to/azure/passing-strings-from-c-to-javascript-in-web-assembly-1p01
+- https://radu-matei.com/blog/practical-guide-to-wasm-memory/

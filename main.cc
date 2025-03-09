@@ -1,11 +1,12 @@
 #include <stdint.h>
+#include "lib/string.h"
 
-extern "C" void console_log(uint32_t value);
+extern "C" void log_string(uint32_t pointer);
 extern uint8_t memory;
 
 
-static void print(uint32_t value) {
-    console_log(value);
+static void log_to_console(const char * value) {
+    log_string((uint32_t)value);
 };
 
 
@@ -15,5 +16,5 @@ extern "C" long add(long a, long b) {
 
 
 extern "C" void run() {
-    console_log(2137);
+    log_to_console("test123");
 };

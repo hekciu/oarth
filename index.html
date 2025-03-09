@@ -5,19 +5,34 @@
         <title>open earth</title>
     </head>
     <body>
-        Hello
+        <canvas id="earth"/>
         <script>
+            const memory = new WebAssembly.Memory({ initial: 256, maximum: 256});
+            heap = new Uint8Array(memory.buffer);
+
+            const cStringToJs = (ptr) => {
+                let output = '';
+                const NULL_CHAR = '\0'.charCodeAt(0);
+
+                for (let i = ptr; i < memory.buffer.byteLength; i++) {
+                    if (heap[i] === NULL_CHAR) {
+                        break;
+                    }
+
+                    output += String.fromCharCode(heap[i]);
+                }
+
+                return output;
+            };
+
             (async () => {
                 const response = await fetch('out.wasm');
                 const bytes = await response.arrayBuffer();
 
-                const memory = new WebAssembly.Memory({ initial: 100, maximum: 1000});
-                heap = new Uint8Array(memory.buffer);
-
                 const imports = {
                     env: {
                         memory: memory,
-                        console_log: (value) => console.log(value),
+                        log_string: (ptr) => console.log(cStringToJs(ptr)),
                     }
                 };
 
