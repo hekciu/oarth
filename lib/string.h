@@ -1,8 +1,6 @@
 #include <stdint.h>
 
 
-
-
 uint32_t strlen(const char * input) {
     uint32_t output = 0;
 
