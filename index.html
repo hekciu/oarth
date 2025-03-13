@@ -33,6 +33,7 @@
                     env: {
                         memory: memory,
                         log_string: (ptr) => console.log(cStringToJs(ptr)),
+                        log_int: (num) => console.log(num),
                     }
                 };
 

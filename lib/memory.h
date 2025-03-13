@@ -7,16 +7,21 @@ extern "C" unsigned char __heap_base;
 #define OARTH_HEAP_OFFSET 1
 
 typedef struct {
-    uint32_t start;
     uint32_t size;
-    void * next;
+    uint32_t next;
 } chunk_header;
 
 
-static chunk_header first_chunk = {
-    NULL,
-    NULL,
-    NULL
+static chunk_header * first_chunk = NULL;
+
+
+static uint8_t is_enough_space_between(chunk_header * c1, chunk_header * c2, uint32_t size) {
+    uint32_t needed_space = sizeof(chunk_header) + size;
+
+    uint32_t first_chunk_end = (uint32_t)c1 + sizeof(chunk_header) + c1->size;
+    uint32_t second_chunk_start = (uint32_t)c2;
+
+    return second_chunk_start - first_chunk_end >= needed_space ? 0 : 1;
 };
 
 
@@ -33,7 +38,9 @@ void * memcpy(void * dest, void * src, uint32_t size) {
 
 
 void * malloc(uint32_t size) {
-    uint32_t max = UINT32_MAX - __heap_base - sizeof(chunk_header);
+    uint32_t heap_end = UINT32_MAX;
+
+    uint32_t max = heap_end - __heap_base - sizeof(chunk_header);
 
     // https://surma.dev/things/c-to-webassembly/
 
@@ -41,15 +48,65 @@ void * malloc(uint32_t size) {
         return NULL;
     }
 
-    if (first_chunk.start == NULL) {
-        uint32_t start = OARTH_HEAP_OFFSET;
+    chunk_header chunk = {};
 
-        first_chunk.start = start;
-        first_chunk.size = size;
-        first_chunk.next = NULL;
+    uint32_t start = OARTH_HEAP_OFFSET;
 
-        return (void *)(&(__heap_base) + start + sizeof(chunk_header));
+    if (first_chunk == NULL) {
+        chunk.size = size;
+        chunk.next = NULL;
+
+        /*
+            copy newly created chunk header from stack to the heap
+        */
+        void * dest = (void *)(__heap_base + start);
+
+        memcpy(dest, (void *)&chunk, sizeof(chunk_header));
+
+        first_chunk = (chunk_header *)dest;
+
+        return (void *)((char *)first_chunk + sizeof(chunk_header));
     }
+
+    chunk_header * next_chunk = first_chunk;
+
+    while (next_chunk->next != NULL) {
+        chunk_header * c1 = next_chunk;
+        chunk_header * c2 = (chunk_header *)c1->next;
+
+        next_chunk = c2;
+
+        if (is_enough_space_between(c1, c2, size) == 0) {
+            chunk.size = size;
+            chunk.next = (uint32_t)c2;
+
+            uint32_t c1_end = (uint32_t)c1 + sizeof(chunk_header) + c1->size;
+
+            /*
+                copy newly created chunk header from stack to the heap
+            */
+            void * dest = (void *)(c1_end + 1);
+
+            memcpy(dest, (void *)&chunk, sizeof(chunk_header));
+            c1->next = (uint32_t)dest;
+
+            return (void *)((char *)dest + sizeof(chunk_header));
+        }
+    }
+
+    uint32_t last_chunk_end = (uint32_t)next_chunk + next_chunk->size + sizeof(chunk_header);
+
+    if (heap_end - last_chunk_end >= (size + sizeof(chunk_header))) {
+        chunk.size = size;
+        chunk.next = NULL;
+
+        void * dest = (void *)(last_chunk_end + 1);
+
+        memcpy(dest, (void *)&chunk, sizeof(chunk_header));
+
+        return (void *)((char *)dest + sizeof(chunk_header));
+    }
+    
 
     return NULL;
 };
