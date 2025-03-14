@@ -8,6 +8,7 @@ extern "C" unsigned char __heap_base;
 
 typedef struct {
     uint32_t size;
+    uint32_t prev; //TODO: this could be optimized in case of memory
     uint32_t next;
 } chunk_header;
 
@@ -55,10 +56,26 @@ void * malloc(uint32_t size) {
     if (first_chunk == NULL) {
         chunk.size = size;
         chunk.next = NULL;
+        chunk.prev = NULL;
 
         /*
             copy newly created chunk header from stack to the heap
         */
+        void * dest = (void *)(__heap_base + start);
+
+        memcpy(dest, (void *)&chunk, sizeof(chunk_header));
+
+        first_chunk = (chunk_header *)dest;
+
+        return (void *)((char *)first_chunk + sizeof(chunk_header));
+    }
+
+
+    if (start + __heap_base + size + sizeof(chunk_header) < (uint32_t)first_chunk) {
+        chunk.size = size;
+        chunk.next = (uint32_t)first_chunk;
+        chunk.prev = NULL;
+
         void * dest = (void *)(__heap_base + start);
 
         memcpy(dest, (void *)&chunk, sizeof(chunk_header));
@@ -79,6 +96,7 @@ void * malloc(uint32_t size) {
         if (is_enough_space_between(c1, c2, size) == 0) {
             chunk.size = size;
             chunk.next = (uint32_t)c2;
+            chunk.prev = (uint32_t)c1;
 
             uint32_t c1_end = (uint32_t)c1 + sizeof(chunk_header) + c1->size;
 
@@ -89,6 +107,7 @@ void * malloc(uint32_t size) {
 
             memcpy(dest, (void *)&chunk, sizeof(chunk_header));
             c1->next = (uint32_t)dest;
+            c2->prev = (uint32_t)dest;
 
             return (void *)((char *)dest + sizeof(chunk_header));
         }
@@ -99,14 +118,27 @@ void * malloc(uint32_t size) {
     if (heap_end - last_chunk_end >= (size + sizeof(chunk_header))) {
         chunk.size = size;
         chunk.next = NULL;
+        chunk.prev = uint32_t(next_chunk);
 
         void * dest = (void *)(last_chunk_end + 1);
 
         memcpy(dest, (void *)&chunk, sizeof(chunk_header));
+        next_chunk->next = (uint32_t)dest;
 
         return (void *)((char *)dest + sizeof(chunk_header));
     }
     
 
     return NULL;
+};
+
+
+void free(void * ptr) {
+    chunk_header * chunk = (chunk_header *)((uint32_t)ptr - sizeof(chunk_header));
+
+    chunk_header * next = (chunk_header *)chunk->next;
+    chunk_header * prev = (chunk_header *)chunk->prev;
+
+    prev->next = chunk->next;
+    next->prev = chunk->prev;
 };

@@ -46,4 +46,32 @@ extern "C" void run() {
     log_to_console(heap_ptr_1);
     log_to_console(heap_ptr_2);
     log_to_console(heap_ptr_3);
+
+    free(heap_ptr_1);
+    free(heap_ptr_2);
+
+    const char * test_string_4 = "hello from heap 4";
+    const char * test_string_5 = "hello from heap 5";
+    const char * test_string_6 = "hello from heap 6";
+
+    const uint32_t string_length_4 = strlen(test_string_4) + 1;
+    const uint32_t string_length_5 = strlen(test_string_5) + 1;
+    const uint32_t string_length_6 = strlen(test_string_6) + 1;
+
+    char * heap_ptr_4 = (char *)malloc(string_length_4);
+    char * heap_ptr_5 = (char *)malloc(string_length_5);
+    char * heap_ptr_6 = (char *)malloc(string_length_6);
+
+    log_int((uint32_t)heap_ptr_4);
+    log_int((uint32_t)heap_ptr_5);
+    log_int((uint32_t)heap_ptr_6);
+
+    memcpy((void *)heap_ptr_4, (void *)test_string_4, string_length_4);
+    memcpy((void *)heap_ptr_5, (void *)test_string_5, string_length_5);
+    memcpy((void *)heap_ptr_6, (void *)test_string_6, string_length_6);
+
+    log_to_console(heap_ptr_4);
+    log_to_console(heap_ptr_5);
+    log_to_console(heap_ptr_6);
+    log_to_console(heap_ptr_3);
 };
