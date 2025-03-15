@@ -3,6 +3,8 @@
 #include "lib/memory.h"
 
 
+extern "C" float test;
+
 extern "C" void log_string(uint32_t pointer);
 extern "C" void log_int(uint32_t value);
 extern uint8_t memory;
@@ -47,8 +49,12 @@ extern "C" void run() {
     log_to_console(heap_ptr_2);
     log_to_console(heap_ptr_3);
 
+    // to nie działa -> zachowuje sie jakby nie bylo dostepnego miejsca
+    // jak robimy free() na pierwszym chunku
     free(heap_ptr_1);
-    free(heap_ptr_2);
+    // free(heap_ptr_2);
+    // free(heap_ptr_3);
+
 
     const char * test_string_4 = "hello from heap 4";
     const char * test_string_5 = "hello from heap 5";
@@ -73,5 +79,4 @@ extern "C" void run() {
     log_to_console(heap_ptr_4);
     log_to_console(heap_ptr_5);
     log_to_console(heap_ptr_6);
-    log_to_console(heap_ptr_3);
 };

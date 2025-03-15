@@ -2,9 +2,19 @@
 
 extern "C" unsigned char __heap_base;
 
+
+
+
+
+extern "C" void log_string(uint32_t pointer);
+extern "C" void log_int(uint32_t value);
+
+
+
+
 #define NULL 0
 
-#define OARTH_HEAP_OFFSET 1
+#define MEMORY_SIZE 16777216
 
 typedef struct {
     uint32_t size;
@@ -39,9 +49,11 @@ void * memcpy(void * dest, void * src, uint32_t size) {
 
 
 void * malloc(uint32_t size) {
-    uint32_t heap_end = UINT32_MAX;
+    uint32_t heap_start = (uint32_t)&__heap_base;
 
-    uint32_t max = heap_end - __heap_base - sizeof(chunk_header);
+    uint32_t heap_end = MEMORY_SIZE - 1;
+
+    uint32_t max = heap_end - heap_start - sizeof(chunk_header);
 
     // https://surma.dev/things/c-to-webassembly/
 
@@ -51,8 +63,6 @@ void * malloc(uint32_t size) {
 
     chunk_header chunk = {};
 
-    uint32_t start = OARTH_HEAP_OFFSET;
-
     if (first_chunk == NULL) {
         chunk.size = size;
         chunk.next = NULL;
@@ -61,7 +71,7 @@ void * malloc(uint32_t size) {
         /*
             copy newly created chunk header from stack to the heap
         */
-        void * dest = (void *)(__heap_base + start);
+        void * dest = (void *)heap_start;
 
         memcpy(dest, (void *)&chunk, sizeof(chunk_header));
 
@@ -70,13 +80,12 @@ void * malloc(uint32_t size) {
         return (void *)((char *)first_chunk + sizeof(chunk_header));
     }
 
-
-    if (start + __heap_base + size + sizeof(chunk_header) < (uint32_t)first_chunk) {
+    if ((uint32_t)heap_start + size + sizeof(chunk_header) < (uint32_t)first_chunk) {
         chunk.size = size;
         chunk.next = (uint32_t)first_chunk;
         chunk.prev = NULL;
 
-        void * dest = (void *)(__heap_base + start);
+        void * dest = (void *)((uint32_t)heap_start);
 
         memcpy(dest, (void *)&chunk, sizeof(chunk_header));
 
@@ -141,4 +150,15 @@ void free(void * ptr) {
 
     prev->next = chunk->next;
     next->prev = chunk->prev;
+
+
+    if (prev == NULL && next == NULL) {
+        first_chunk = NULL;
+        return;
+    }
+
+
+    if (prev == NULL) {
+        first_chunk = chunk;
+    }
 };
