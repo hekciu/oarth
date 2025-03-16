@@ -49,14 +49,12 @@ extern "C" void run() {
     log_to_console(heap_ptr_2);
     log_to_console(heap_ptr_3);
 
-    // to nie działa -> zachowuje sie jakby nie bylo dostepnego miejsca
-    // jak robimy free() na pierwszym chunku
-    free(heap_ptr_1);
+    // free(heap_ptr_1);
     // free(heap_ptr_2);
-    // free(heap_ptr_3);
+    free(heap_ptr_3);
 
 
-    const char * test_string_4 = "hello from heap 4";
+    const char * test_string_4 = "hello from heap 45555";
     const char * test_string_5 = "hello from heap 5";
     const char * test_string_6 = "hello from heap 6";
 

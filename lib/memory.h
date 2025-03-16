@@ -3,15 +3,6 @@
 extern "C" unsigned char __heap_base;
 
 
-
-
-
-extern "C" void log_string(uint32_t pointer);
-extern "C" void log_int(uint32_t value);
-
-
-
-
 #define NULL 0
 
 #define MEMORY_SIZE 16777216
@@ -159,6 +150,6 @@ void free(void * ptr) {
 
 
     if (prev == NULL) {
-        first_chunk = chunk;
+        first_chunk = next;
     }
 };
