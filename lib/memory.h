@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdint.h>
 
 extern "C" unsigned char __heap_base;
@@ -15,6 +17,9 @@ typedef struct {
 
 
 static chunk_header * first_chunk = NULL;
+
+
+// TODO: write tests
 
 
 static uint8_t is_enough_space_between(chunk_header * c1, chunk_header * c2, uint32_t size) {
@@ -153,3 +158,40 @@ void free(void * ptr) {
         first_chunk = next;
     }
 };
+
+
+// TODO: should realloc free pointer is case of not being successful?
+void * realloc(void * ptr, uint32_t size) {
+    if (ptr == NULL) {
+        return malloc(size);
+    }
+
+
+    if (ptr != NULL && size == 0) {
+        free(ptr); 
+        return NULL;
+    }
+
+    chunk_header * chunk = (chunk_header *)((uint32_t)ptr - sizeof(chunk_header));
+
+    if (chunk->size <= size) {
+        chunk->size = size;
+        return ptr;
+    }
+
+    if (chunk->next == NULL) {
+        if ((uint32_t)ptr + size < MEMORY_SIZE) {
+            chunk->size = size;
+            return ptr;
+        }
+
+        return NULL;
+    }
+
+    if (chunk->next - (uint32_t)chunk - sizeof(chunk_header) >= size) {
+        chunk->size = size;
+        return ptr;
+    }
+
+    return NULL;
+}
