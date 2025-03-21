@@ -33,6 +33,7 @@
                     env: {
                         memory: memory,
                         log_string: (ptr) => console.log(cStringToJs(ptr)),
+                        log_error: (ptr) => console.error(cStringToJs(ptr)),
                         log_int: (num) => console.log(num),
                     }
                 };
@@ -44,7 +45,8 @@
 
                 // console.log(wasm.add(3, 5));
 
-                wasm.run();
+                // wasm.run();
+                wasm.run_tests();
             })();
 
         </script>

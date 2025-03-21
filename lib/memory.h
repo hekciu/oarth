@@ -4,6 +4,8 @@
 
 extern "C" unsigned char __heap_base;
 
+// TODO remove this
+extern "C" void log_int(uint32_t value);
 
 #define NULL 0
 
@@ -187,6 +189,9 @@ void * realloc(void * ptr, uint32_t size) {
 
         return NULL;
     }
+
+    log_int(chunk->size);
+    log_int(size);
 
     if (chunk->next - (uint32_t)chunk - sizeof(chunk_header) >= size) {
         chunk->size = size;
