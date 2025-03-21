@@ -198,5 +198,9 @@ void * realloc(void * ptr, uint32_t size) {
         return ptr;
     }
 
+    if (ptr != NULL) {
+        free(ptr);
+    }
+
     return NULL;
 }
