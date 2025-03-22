@@ -1,12 +1,8 @@
 #pragma once
 
 #include "lib/memory.h"
-
-extern "C" unsigned char __heap_base;
-
-extern "C" void log_string(const char * value);
-extern "C" void log_int(uint32_t value);
-extern "C" void log_error(const char * value);
+#include "lib/string.hpp"
+#include "lib/js_imports.h"
 
 
 static uint16_t error_count = 0;
@@ -161,16 +157,40 @@ static void test_memory() {
         test_ptr_1 = (char *)realloc(test_ptr_0, 0);
         test_ptr_2 = (char *)malloc(69);
 
-        return test_ptr_1 == NULL && test_ptr_2 == test_ptr_0;;
+        return test_ptr_1 == NULL && test_ptr_2 == test_ptr_0;
     }());
 
-    free(test_ptr_0);
     free(test_ptr_2);
+};
+
+
+void test_std_string() {
+    TEST("[std::string] -> std::string() should allocate empty string on the heap", [&] {
+        std::string test_string = std::string();
+
+        const char * base_str = test_string.c_str();
+
+        return *base_str == '\0';
+    }());
+
+
+    TEST("[std::string] -> std::string(data) should create copy of the data on the heap", [&] {
+        const char * data = "hello";
+
+        std::string test_string = std::string(data);
+
+        const char * base_str = test_string.c_str();
+
+        log_string(test_string.c_str());
+
+        return memcmp((const void *)base_str, (const void *)data, strlen(data) + 1) == 0;
+    }());
 };
 
 
 extern "C" void run_tests() {
     test_memory();
+    test_std_string();
 
     if (error_count > 0) {
         log_error("some tests failed, number of errors:");

@@ -35,6 +35,7 @@
                         log_string: (ptr) => console.log(cStringToJs(ptr)),
                         log_error: (ptr) => console.error(cStringToJs(ptr)),
                         log_int: (num) => console.log(num),
+                        exit_wasm: (code) => {throw new Error(`WebAssembly module exited with error code: ${code}`)},
                     }
                 };
 
