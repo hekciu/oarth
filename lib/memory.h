@@ -4,9 +4,6 @@
 
 extern "C" unsigned char __heap_base;
 
-// TODO remove this
-extern "C" void log_int(uint32_t value);
-
 #define NULL 0
 
 #define MEMORY_SIZE 16777216
@@ -19,9 +16,6 @@ typedef struct {
 
 
 static chunk_header * first_chunk = NULL;
-
-
-// TODO: write tests
 
 
 static uint8_t is_enough_space_between(chunk_header * c1, chunk_header * c2, uint32_t size) {
@@ -162,7 +156,9 @@ void free(void * ptr) {
 };
 
 
-// TODO: should realloc free pointer is case of not being successful?
+/*
+    Realloc SHOULD NOT free pointer on failure
+*/
 void * realloc(void * ptr, uint32_t size) {
     if (ptr == NULL) {
         return malloc(size);
@@ -176,7 +172,7 @@ void * realloc(void * ptr, uint32_t size) {
 
     chunk_header * chunk = (chunk_header *)((uint32_t)ptr - sizeof(chunk_header));
 
-    if (chunk->size <= size) {
+    if (chunk->size >= size) {
         chunk->size = size;
         return ptr;
     }
@@ -190,16 +186,11 @@ void * realloc(void * ptr, uint32_t size) {
         return NULL;
     }
 
-    log_int(chunk->size);
-    log_int(size);
+    uint32_t chunk_header_end = (uint32_t)chunk + sizeof(chunk_header);
 
-    if (chunk->next - (uint32_t)chunk - sizeof(chunk_header) >= size) {
+    if (chunk_header_end + size < chunk->next) {
         chunk->size = size;
         return ptr;
-    }
-
-    if (ptr != NULL) {
-        free(ptr);
     }
 
     return NULL;
