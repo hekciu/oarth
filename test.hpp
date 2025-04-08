@@ -7,20 +7,24 @@
 
 static uint16_t error_count = 0;
 
-#define TEST(task_name, statement)\
-(\
-    {\
-        log_string("running task:");\
-        log_string(task_name);\
-        if (statement) {\
-            log_string("success");\
-        } else {\
-            log_error("failure");\
-            error_count++;\
-        }\
-        log_string("\n");\
-    }\
-)
+
+template <typename F>
+void TEST(const char * task_name, const F & lambda) {
+    log_string("running task:");
+
+    log_string(task_name);
+
+    bool result = lambda();
+
+    if (result) {
+        log_string("success");
+    } else {
+        log_error("failure");
+        error_count++;
+    }
+
+    log_string("\n");
+}
 
 
 static void test_memory() {
@@ -31,7 +35,7 @@ static void test_memory() {
     TEST("[malloc] should allocate memory on the heap", [&]{
         test_ptr_0 = (char *)malloc(2);
         return (uint32_t)test_ptr_0 >= (uint32_t)&__heap_base;
-    }());
+    });
 
     free(test_ptr_0);
 
@@ -46,7 +50,7 @@ static void test_memory() {
         uint32_t second_chunk_start = (uint32_t)test_ptr_1 - chunk_header_size;
 
         return first_chunk_end + 1 == second_chunk_start;
-    }());
+    });
 
     free(test_ptr_0);
     free(test_ptr_1);
@@ -62,7 +66,7 @@ static void test_memory() {
         test_ptr_1 = (char *)malloc(2137);
         return ((uint32_t)test_ptr_0 < (uint32_t)test_ptr_1) &&
             ((uint32_t)test_ptr_1 < (uint32_t)test_ptr_2);
-    }());
+    });
 
     free(test_ptr_0);
     free(test_ptr_1);
@@ -75,7 +79,7 @@ static void test_memory() {
         test_ptr_0 = (char *)malloc(all_heap_space);
 
         return test_ptr_0 == NULL;
-    }());
+    });
 
 
     TEST("[realloc] should allocate memory when no pointer is provided", [&]{
@@ -88,7 +92,7 @@ static void test_memory() {
         uint32_t second_chunk_start = (uint32_t)test_ptr_1 - chunk_header_size;
 
         return first_chunk_end + 1 == second_chunk_start;
-    }());
+    });
 
     free(test_ptr_0);
     free(test_ptr_1);
@@ -105,7 +109,7 @@ static void test_memory() {
         uint32_t second_chunk_start = (uint32_t)test_ptr_2 - chunk_header_size;
 
         return test_ptr_0 == test_ptr_1 && first_chunk_end + 1 == second_chunk_start;
-    }());
+    });
 
     free(test_ptr_0);
     free(test_ptr_2);
@@ -122,7 +126,7 @@ static void test_memory() {
         uint32_t second_chunk_start = (uint32_t)test_ptr_2 - chunk_header_size;
 
         return test_ptr_0 == test_ptr_1 && first_chunk_end + 1 == second_chunk_start;
-    }());
+    });
 
     free(test_ptr_0);
     free(test_ptr_2);
@@ -134,7 +138,7 @@ static void test_memory() {
         test_ptr_2 = (char *)realloc(test_ptr_0, 2138);
 
         return test_ptr_2 == NULL;
-    }());
+    });
 
     free(test_ptr_0);
     free(test_ptr_1);
@@ -146,7 +150,7 @@ static void test_memory() {
         test_ptr_2 = (char *)realloc(test_ptr_1, MEMORY_SIZE);
 
         return test_ptr_2 == NULL;
-    }());
+    });
 
     free(test_ptr_0);
     free(test_ptr_1);
@@ -158,7 +162,7 @@ static void test_memory() {
         test_ptr_2 = (char *)malloc(69);
 
         return test_ptr_1 == NULL && test_ptr_2 == test_ptr_0;
-    }());
+    });
 
     free(test_ptr_2);
 };
@@ -171,7 +175,7 @@ void test_std_string() {
         const char * base_str = test_string.c_str();
 
         return *base_str == '\0';
-    }());
+    });
 
 
     TEST("[std::string] -> std::string(data) should create copy of the data on the heap", [&] {
@@ -182,7 +186,7 @@ void test_std_string() {
         const char * base_str = test_string.c_str();
 
         return memcmp((const void *)base_str, (const void *)data, strlen(data) + 1) == 0;
-    }());
+    });
 
 
     TEST("[std::string] -> str = [const char *] should create copy of the data on the heap", [&] {
@@ -193,7 +197,7 @@ void test_std_string() {
         const char * base_str = test_string.c_str();
 
         return memcmp((const void *)base_str, (const void *)data, strlen(data) + 1) == 0;
-    }());
+    });
 
 
     TEST("[std::string] -> str = \"test\" should create copy of the data on the heap", [&] {
@@ -204,7 +208,7 @@ void test_std_string() {
         const char * base_str = test_string.c_str();
 
         return memcmp((const void *)base_str, (const void *)data, strlen(data) + 1) == 0;
-    }());
+    });
 
 
     TEST("[std::string] -> should assign new value", [&] {
@@ -240,7 +244,7 @@ void test_std_string() {
         log_string(concatenated2.c_str());
 
         return memcmp((const void *)base_str, (const void *)data, strlen(data) + 1) == 0;
-    }());
+    });
 };
 
 
