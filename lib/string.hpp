@@ -76,11 +76,13 @@ public:
     string operator+(const string & str) {
         const char * c_str1 = this->c_str();
         const char * c_str2 = str.c_str();
-        const uint32_t size = strlen(c_str1) + strlen(c_str2) + 1;
 
-        char * tmp = (char *)malloc(size);
+        const uint32_t output_size = strlen(c_str1) + strlen(c_str2) + 1;
+
+        char * tmp = (char *)malloc(output_size);
         memcpy((void *)tmp, (void *)c_str1, strlen(c_str1));
         memcpy((void *)(tmp + strlen(c_str1)), (void *)c_str2, strlen(c_str2));
+
         *(tmp + strlen(c_str1) + strlen(c_str2)) = '\0';
 
         string out = tmp;

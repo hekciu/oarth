@@ -217,33 +217,24 @@ void test_std_string() {
         std::string other_string = data;
 
         std::string test_string = "something else";
-        log_int((uint32_t)test_string.c_str());
-        log_string(test_string.c_str());
         test_string = "AAAAAAAAAAAAAAA";
-        log_int((uint32_t)test_string.c_str());
-        log_string(test_string.c_str());
         test_string = "test 123";
-        log_int((uint32_t)test_string.c_str());
-        log_string(test_string.c_str());
         test_string = "dupa dupa";
-        log_int((uint32_t)test_string.c_str());
-        log_string(test_string.c_str());
         test_string = other_string;
-        log_int((uint32_t)test_string.c_str());
-        log_string(test_string.c_str());
 
         const char * base_str = test_string.c_str();
 
+        return memcmp((const void *)base_str, (const void *)data, strlen(data) + 1) == 0;
+    });
+
+    TEST("[std::string] -> string + string should produce new concatenated string", [&] {
         std::string test1 = "test1";
         std::string test2 = "test2";
 
-        std::string concatenated1 = test1 + test2;
-        log_string(concatenated1.c_str());
+        std::string concatenated = test1 + test2;
+        const char * concatenated_data = concatenated.c_str();
 
-        std::string concatenated2 = concatenated1 + "test3";
-        log_string(concatenated2.c_str());
-
-        return memcmp((const void *)base_str, (const void *)data, strlen(data) + 1) == 0;
+        return memcmp((const void *)"test1test2", (const void *)concatenated_data, strlen(concatenated_data) + 1) == 0;
     });
 };
 

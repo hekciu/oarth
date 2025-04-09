@@ -42,8 +42,8 @@ void * memcpy(void * dest, void * src, uint32_t size) {
 
 int memcmp(const void * s1, const void * s2, uint32_t n) {
     for (uint32_t i = 0; i < n; i++) {
-        unsigned char first = *((unsigned char *)s1 + n);
-        unsigned char second = *((unsigned char *)s2 + n);
+        unsigned char first = *((unsigned char *)s1 + i);
+        unsigned char second = *((unsigned char *)s2 + i);
 
         if (first != second) {
             return second - first;
