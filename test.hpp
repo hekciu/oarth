@@ -2,6 +2,7 @@
 
 #include "lib/memory.h"
 #include "lib/string.hpp"
+#include "lib/vector.hpp"
 #include "lib/js_imports.h"
 
 
