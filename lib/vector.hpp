@@ -15,6 +15,24 @@ public:
         this->_size = 0;
     }
 
+    vector(uint32_t count) {
+        this->_size = count;
+        this->raw = (T *)malloc(sizeof(T));
+
+        if (this->raw == NULL) {
+            exit_wasm(1);
+        }
+
+        for (uint32_t i = 0; i < count; i++) {
+            // new (this->raw + i) T();
+            *(this->raw + i) = T();
+        }
+    }
+
+    ~vector() {
+        free(this->raw);
+    }
+
     T * data () {
         return this->raw;
     }
@@ -30,7 +48,7 @@ public:
     // provides strong exception guarantee
     void push_back(const T & value) {
         if (MEMORY_SIZE - sizeof(T) >= this->size) {
-            throw new exception();
+            exit_wasm(1);
         }
 
         const uint32_t new_size = this->_size + sizeof(T);
@@ -38,8 +56,7 @@ public:
         T * tmp = (T *)realloc((void *)this->raw, new_size);
 
         if (tmp != NULL) {
-            // TODO: maybe this->raw + this->_size == tmp ????
-            memcpy(this->raw + this->_size, &value, sizeof(T));
+            memcpy(tmp, &value, sizeof(T));
             this->_size = new_size;
 
             return;
@@ -48,7 +65,7 @@ public:
         tmp = (T *)malloc(new_size);
 
         if (tmp == NULL) {
-            throw new exception();
+            exit_wasm(1);
         }
 
         memcpy(tmp, this->raw, this->_size);

@@ -240,9 +240,29 @@ void test_std_string() {
 };
 
 
+void test_std_vector() {
+    TEST("[std::vector] -> vector::vector(size_t value) should allocate continuous storage on the heap", [&] {
+        std::vector<uint8_t> v1(1);
+        std::vector<uint8_t> v2(1);
+
+        void * v1_raw = (void *)v1.data();
+        void * v2_raw = (void *)v2.data();
+
+        uint8_t test_data = 0;
+
+        return (uint32_t)v1_raw > __heap_base &&
+            (uint32_t)v2_raw > __heap_base &&
+            v2_raw != v1_raw &&
+            memcmp(v1_raw, (void *)&test_data, 1) == 0 &&
+            memcmp(v2_raw, (void *)&test_data, 1) == 0;
+    });
+};
+
+
 extern "C" void run_tests() {
     test_memory();
     test_std_string();
+    test_std_vector();
 
     if (error_count > 0) {
         log_error("some tests failed, number of errors:");
