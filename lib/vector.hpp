@@ -29,6 +29,18 @@ public:
         }
     }
 
+    // https://stackoverflow.com/questions/1657883/variable-number-of-arguments-in-c
+    // https://www.stroustrup.com/C++11FAQ.html#variadic-templates
+    template<typename... Args>
+    vector(Args... elements) {
+        // zly konstruktor tutaj sie wywoluje
+        log_string("AAAAAAAAAAAAAAAAAAAAAA");
+        this->raw = NULL;
+        this->_size = 0;
+
+        this->add_elements(elements...);
+    }
+
     ~vector() {
         free(this->raw);
     }
@@ -45,9 +57,9 @@ public:
         return this->_size;
     }
 
-    // provides strong exception guarantee
+    // TODO: provides strong exception guarantee, check that
     void push_back(const T & value) {
-        if (MEMORY_SIZE - sizeof(T) >= this->size) {
+        if (MEMORY_SIZE - sizeof(T) <= this->_size) {
             exit_wasm(1);
         }
 
@@ -56,8 +68,10 @@ public:
         T * tmp = (T *)realloc((void *)this->raw, new_size);
 
         if (tmp != NULL) {
-            memcpy(tmp, &value, sizeof(T));
-            this->_size = new_size;
+            this->raw = tmp;
+
+            memcpy(this->raw + this->_size, (void *)&value, sizeof(T));
+            this->_size++;
 
             return;
         }
@@ -69,7 +83,7 @@ public:
         }
 
         memcpy(tmp, this->raw, this->_size);
-        memcpy(tmp + this->_size, &value, sizeof(T));
+        memcpy(tmp + this->_size, (void *)&value, sizeof(T));
 
         free(this->raw);
 
@@ -77,10 +91,24 @@ public:
     }
 
     // provides strong exception guarantee
+    /*
     void push_back(T && value) {
 
     }
+    */
+
 private:
+    void add_elements(T element) {
+        this->push_back(element);
+    }
+
+    template<typename... Args>
+    void add_elements(T element, Args... elements) {
+        this->push_back(element);
+
+        this->add_elements(elements...);
+    }
+
     T * raw;
     uint32_t _size;
 };

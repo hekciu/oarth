@@ -241,7 +241,7 @@ void test_std_string() {
 
 
 void test_std_vector() {
-    TEST("[std::vector] -> vector::vector(size_t value) should allocate continuous storage on the heap", [&] {
+    TEST("[std::vector] -> vector::vector(size_t value) should allocate elements on the heap", [&] {
         std::vector<uint8_t> v1(1);
         std::vector<uint8_t> v2(1);
 
@@ -255,6 +255,25 @@ void test_std_vector() {
             v2_raw != v1_raw &&
             memcmp(v1_raw, (void *)&test_data, 1) == 0 &&
             memcmp(v2_raw, (void *)&test_data, 1) == 0;
+    });
+
+    TEST("[std::vector] -> multi-element constructor should work as expected", [&] {
+        std::vector<uint8_t> v = {
+            1,
+            2,
+            3
+        };
+
+        void * v_raw = (void *)v.data();
+
+        uint8_t test_data[] = {
+            1,
+            2,
+            3
+        };
+
+        return (uint32_t)v_raw > __heap_base &&
+            memcmp(v_raw, (void *)&test_data, 3) == 0;
     });
 };
 
