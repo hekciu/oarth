@@ -2,3 +2,5 @@
 - https://dev.to/azure/passing-strings-from-c-to-javascript-in-web-assembly-1p01
 - https://radu-matei.com/blog/practical-guide-to-wasm-memory/
 - https://wiki.openstreetmap.org/wiki/Overpass_API
+- https://stackoverflow.com/questions/1657883/variable-number-of-arguments-in-c
+- https://www.stroustrup.com/C++11FAQ.html#variadic-templates

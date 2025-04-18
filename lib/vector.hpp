@@ -15,7 +15,8 @@ public:
         this->_size = 0;
     }
 
-    vector(uint32_t count) {
+    template<typename I = int>
+    vector(I count) {
         this->_size = count;
         this->raw = (T *)malloc(sizeof(T));
 
@@ -29,12 +30,8 @@ public:
         }
     }
 
-    // https://stackoverflow.com/questions/1657883/variable-number-of-arguments-in-c
-    // https://www.stroustrup.com/C++11FAQ.html#variadic-templates
     template<typename... Args>
     vector(Args... elements) {
-        // zly konstruktor tutaj sie wywoluje
-        log_string("AAAAAAAAAAAAAAAAAAAAAA");
         this->raw = NULL;
         this->_size = 0;
 

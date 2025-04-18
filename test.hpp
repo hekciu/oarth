@@ -257,6 +257,9 @@ void test_std_vector() {
             memcmp(v2_raw, (void *)&test_data, 1) == 0;
     });
 
+    // https://stackoverflow.com/questions/16967797/priorities-of-constructors-c
+    // https://en.cppreference.com/w/cpp/language/sfinae
+
     TEST("[std::vector] -> multi-element constructor should work as expected", [&] {
         std::vector<uint8_t> v = {
             1,
