@@ -257,10 +257,7 @@ void test_std_vector() {
             memcmp(v2_raw, (void *)&test_data, 1) == 0;
     });
 
-    // https://stackoverflow.com/questions/16967797/priorities-of-constructors-c
-    // https://en.cppreference.com/w/cpp/language/sfinae
-
-    TEST("[std::vector] -> multi-element constructor should work as expected", [&] {
+    TEST("[std::vector] -> multi-element constructor should work as expected 1", [&] {
         std::vector<uint8_t> v = {
             1,
             2,
@@ -277,6 +274,22 @@ void test_std_vector() {
 
         return (uint32_t)v_raw > __heap_base &&
             memcmp(v_raw, (void *)&test_data, 3) == 0;
+    });
+
+    TEST("[std::vector] -> multi-element constructor should work as expected 2", [&] {
+        // this still does not work
+        std::vector<uint8_t> v = {
+            6,
+        };
+
+        void * v_raw = (void *)v.data();
+
+        uint8_t test_data[] = {
+            6,
+        };
+
+        return (uint32_t)v_raw > __heap_base &&
+            memcmp(v_raw, (void *)&test_data, 1) == 0;
     });
 };
 

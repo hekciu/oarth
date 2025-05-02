@@ -3,10 +3,12 @@
 #include <stdint.h>
 #include "memory.h"
 #include "exception.hpp"
+#include "initializer_list.hpp"
 
 namespace std {
 
-// contiguous storage is guaranteed
+
+// continuous storage is guaranteed
 template<typename T>
 class vector {
 public:
@@ -15,8 +17,20 @@ public:
         this->_size = 0;
     }
 
-    template<typename I = int>
-    vector(I count) {
+    // template<typename... Args>
+    // vector(Args... elements) {
+    vector(initializer_list<T> i_list) {
+        this->raw = NULL;
+        this->_size = 0;
+
+        for (auto itr = i_list.begin(); itr != i_list.end(); itr++) {
+            this->push_back(*itr);
+        }
+
+        // this->add_elements(elements...);
+    }
+
+    vector(int count) {
         this->_size = count;
         this->raw = (T *)malloc(sizeof(T));
 
@@ -28,14 +42,6 @@ public:
             // new (this->raw + i) T();
             *(this->raw + i) = T();
         }
-    }
-
-    template<typename... Args>
-    vector(Args... elements) {
-        this->raw = NULL;
-        this->_size = 0;
-
-        this->add_elements(elements...);
     }
 
     ~vector() {
@@ -95,6 +101,7 @@ public:
     */
 
 private:
+    /*
     void add_elements(T element) {
         this->push_back(element);
     }
@@ -105,9 +112,11 @@ private:
 
         this->add_elements(elements...);
     }
+    */
 
     T * raw;
     uint32_t _size;
 };
+
 
 }
