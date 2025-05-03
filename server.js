@@ -10,6 +10,12 @@ const server = http.createServer((req, res) => {
         filePath = './index.html';
     }
 
+    if (filePath === './healthcheck') {
+        res.writeHead(200);
+        res.end('OK');
+        return;
+    }
+
     if (!files.includes(filePath)) {
         res.writeHead(404);
         res.end();

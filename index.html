@@ -10,6 +10,9 @@
             const memory = new WebAssembly.Memory({ initial: 256, maximum: 256});
             heap = new Uint8Array(memory.buffer);
 
+            let jsMalloc;
+            let table;
+
             const cStringToJs = (ptr) => {
                 let output = '';
                 const NULL_CHAR = '\0'.charCodeAt(0);
@@ -25,6 +28,22 @@
                 return output;
             };
 
+            const jsStringToC = (str) => {
+                const ptr = jsMalloc(str.length + 1);
+
+                for (let i = 0; i < str.length; i++) {
+                    heap[ptr + i] = str[i].charCodeAt(0);
+                }
+
+                heap[ptr + str.length] = "\0".charCodeAt(0);
+
+                return ptr;
+            };
+
+            const invokeFnPtr = (fnPtr, argPtr) => {
+                table.get(fnPtr)(argPtr);
+            };
+
             (async () => {
                 const response = await fetch('out.wasm');
                 const bytes = await response.arrayBuffer();
@@ -32,10 +51,23 @@
                 const imports = {
                     env: {
                         memory: memory,
+                        table: table,
                         log_string: (ptr) => console.log(cStringToJs(ptr)),
                         log_error: (ptr) => console.error(cStringToJs(ptr)),
                         log_int: (num) => console.log(num),
                         exit_wasm: (code) => {throw new Error(`WebAssembly module exited with error code: ${code}`)},
+                        fetch: async (urlStrPtr, bodyStrPtr, cbPtr) => {
+                            const result = await fetch(cStringToJs(urlStrPtr), {
+                                method: 'GET',
+                                body: bodyStrPtr !== 0 ? cStrToJs(bodyStrPtr) : undefined,
+                            });
+
+                            const body = await result.text();
+
+                            const outputStrPtr = jsStringToC(body);
+
+                            invokeFnPtr(cbPtr, outputStrPtr);
+                        },
                     }
                 };
 
@@ -44,10 +76,13 @@
 
                 const wasm = wasmInstance.exports;
 
-                // console.log(wasm.add(3, 5));
+                table = wasm["__indirect_function_table"];
 
-                // wasm.run();
-                wasm.run_tests();
+                jsMalloc = (numBytes) => wasm.js_malloc(numBytes);
+
+                wasm.run();
+
+                // wasm.run_tests();
             })();
 
         </script>
